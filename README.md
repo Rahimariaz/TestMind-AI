@@ -1,2 +1,2 @@
-# TeamMind-AI
+# TestMind-AI
 Al powered collaboration platform
