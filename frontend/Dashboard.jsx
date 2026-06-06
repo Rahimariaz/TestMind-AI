@@ -1,38 +1,88 @@
 import React, { useState } from "react";
+import axios from "axios";
 import "./Dashboard.css";
 
 function Dashboard() {
   const [message, setMessage] = useState("Welcome to TestMind AI");
+  const generateHandover = () => {
+  alert(
+    "Current Task: Backend Development\nStatus: On Leave\nHandover Generated Successfully"
+  );
+};
+const generateReport = () => {
+             alert("Report Generated Successfully");
+            };
+
   const [translatorText, setTranslatorText] = useState("");
+  const [targetLanguage, setTargetLanguage] = useState("hi");
   const [translatedText, setTranslatedText] = useState("");
 
   const [aiQuestion, setAiQuestion] = useState("");
   const [aiAnswer, setAiAnswer] = useState("");
 
   const [taskInput, setTaskInput] = useState("");
+  const [teamOnline, setTeamOnline] = useState("");
+const [languages, setLanguages] = useState("");
+const [totalTasks, setTotalTasks] = useState(0);
+const [completedTasks, setCompletedTasks] = useState(0);
+const [teamMembers, setTeamMembers] = useState(0);
+const [report, setReport] = useState("");
   const [tasks, setTasks] = useState([
     "Frontend Development",
     "Backend API Integration",
     "Testing",
   ]);
-
   const handleTranslate = () => {
-    if (!translatorText.trim()) {
-      alert("Enter text to translate");
-      return;
+  if (!translatorText.trim()) {
+    alert("Enter text to translate");
+    return;
+  }
+
+  if (targetLanguage === "hi") {
+    setTranslatedText("नमस्ते");
+  } else if (targetLanguage === "ta") {
+    setTranslatedText("வணக்கம்");
+  } else if (targetLanguage === "fr") {
+    setTranslatedText("Bonjour");
+  } else if (targetLanguage === "es") {
+    setTranslatedText("Hola");
+  }
+};
+const handleAI = async () => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        question: aiQuestion,
+      }),
     }
+);
+const generateReport = () => {
+  const reportText = `
+Project Report
 
-    setTranslatedText("Translated Output: " + translatorText);
-  };
+Total Tasks: ${totalTasks}
+Completed Tasks: ${completedTasks}
+Active Tasks: ${activeTasks}
+Team Members: ${teamMembers}
+Project Health: ${projectHealth}%
 
-  const handleAI = () => {
-    if (!aiQuestion.trim()) {
-      alert("Ask something");
-      return;
-    }
+Report Generated Successfully
+  `;
 
-    setAiAnswer("AI Response: " + aiQuestion);
-  };
+  setReport(reportText);
+};
+ const data = await response.json();
+    setAiAnswer(data.answer);
+ 
+} catch (error) {
+    setAiAnswer("Backend not connected");
+  }
+};
+  
 
   const addTask = () => {
     if (!taskInput.trim()) {
@@ -93,7 +143,23 @@ function Dashboard() {
         </h1>
 
         <p>{message}</p>
+         <div className="section">
+  <h2>📋 Project Inputs</h2>
 
+  <input
+    type="number"
+    placeholder="Team Members Online"
+    value={teamOnline}
+    onChange={(e) => setTeamOnline(e.target.value)}
+  />
+
+  <input
+    type="number"
+    placeholder="Languages Supported"
+    value={languages}
+    onChange={(e) => setLanguages(e.target.value)}
+  />
+</div>
         {/* Cards */}
         <div className="cards">
 
@@ -101,7 +167,7 @@ function Dashboard() {
             className="card purple"
             onClick={() => alert("Project Health: 82%")}
           >
-            <h2>82</h2>
+            <h2>{Math.min(tasks.length * 20, 100)}</h2>
             <p>Project Health</p>
           </div>
 
@@ -109,7 +175,7 @@ function Dashboard() {
             className="card blue"
             onClick={() => alert("24 Active Tasks")}
           >
-            <h2>24</h2>
+          <h2>{tasks.length}</h2>
             <p>Active Tasks</p>
           </div>
 
@@ -117,7 +183,7 @@ function Dashboard() {
             className="card green"
             onClick={() => alert("18 Team Members Online")}
           >
-            <h2>18</h2>
+          <h2>{teamOnline || 0}</h2>
             <p>Team Online</p>
           </div>
 
@@ -125,7 +191,7 @@ function Dashboard() {
             className="card orange"
             onClick={() => alert("12 Languages Supported")}
           >
-            <h2>12</h2>
+          <h2>{languages || 0}</h2>
             <p>Languages</p>
           </div>
 
@@ -134,7 +200,23 @@ function Dashboard() {
         {/* Progress */}
         <div className="section">
           <h2>📊 Project Progress</h2>
+<input
+  type="number"
+  placeholder="Total Tasks"
+  onChange={(e) => setTotalTasks(Number(e.target.value))}
+/>
 
+<input
+  type="number"
+  placeholder="Completed Tasks"
+  onChange={(e) => setCompletedTasks(Number(e.target.value))}
+/>
+
+<input
+  type="number"
+  placeholder="Team Members"
+  onChange={(e) => setTeamMembers(Number(e.target.value))}
+/>
           <div className="progressBar">
             <div className="progressFill"></div>
           </div>
@@ -154,7 +236,15 @@ function Dashboard() {
               setTranslatorText(e.target.value)
             }
           />
-
+<select
+  value={targetLanguage}
+  onChange={(e) => setTargetLanguage(e.target.value)}
+>
+  <option value="hi">Hindi</option>
+  <option value="ta">Tamil</option>
+  <option value="fr">French</option>
+  <option value="es">Spanish</option>
+</select>
           <button
             className="actionBtn"
             onClick={handleTranslate}
@@ -207,14 +297,14 @@ function Dashboard() {
               setTaskInput(e.target.value)
             }
           />
-
+          
           <button
             className="actionBtn"
             onClick={addTask}
           >
             Add Task
           </button>
-
+    
           <ul>
             {tasks.map((task, index) => (
               <li key={index}>{task}</li>
@@ -228,29 +318,25 @@ function Dashboard() {
 
           <p>Current Task: Backend Development</p>
           <p>Status: On Leave</p>
-
-          <button
-            className="actionBtn"
-            onClick={() =>
-              alert("AI Handover Generated")
-            }
-          >
-            Generate Handover
-          </button>
+<button
+  className="actionBtn"
+  onClick={() => alert("Handover Generated Successfully")}
+>
+  Generate Handover
+</button>
+          
         </div>
 
         {/* Reports */}
         <div className="section">
           <h2>📑 Reports</h2>
-
-          <button
-            className="actionBtn"
-            onClick={() =>
-              alert("Report Generated Successfully")
-            }
-          >
-            Generate Report
-          </button>
+         <button
+  className="actionBtn"
+  onClick={generateReport}
+>
+  Generate Report
+</button>
+          
         </div>
 
       </div>
