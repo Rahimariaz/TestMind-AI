@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
+from deep_translator import GoogleTranslator
 
 app = Flask(__name__)
 CORS(app)
@@ -38,6 +39,21 @@ def delete_task(index):
     return {
         "message": "Task Not Found"
     }
+@app.route('/translate', methods=['POST'])
+def translate_text():
+    data = request.get_json()
+
+    text = data['text']
+    target = data['target_language']
+
+    translated = GoogleTranslator(
+        source='auto',
+        target=target
+    ).translate(text)
+
+    return jsonify({
+        "translated_text": translated
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
