@@ -10,8 +10,19 @@ function Dashboard() {
   );
 };
 const generateReport = () => {
-             alert("Report Generated Successfully");
-            };
+  const reportText = `
+PROJECT REPORT
+
+Total Tasks: ${totalTasks}
+Completed Tasks: ${completedTasks}
+Active Tasks: ${tasks.length}
+Team Members: ${teamMembers}
+Project Health: ${Math.min(tasks.length * 20, 100)}%
+Progress: ${progress}%
+`;
+
+  alert(reportText);
+};
 
   const [translatorText, setTranslatorText] = useState("");
   const [targetLanguage, setTargetLanguage] = useState("hi");
@@ -60,21 +71,7 @@ const handleAI = async () => {
       }),
     }
 );
-const generateReport = () => {
-  const reportText = `
-Project Report
 
-Total Tasks: ${totalTasks}
-Completed Tasks: ${completedTasks}
-Active Tasks: ${activeTasks}
-Team Members: ${teamMembers}
-Project Health: ${projectHealth}%
-
-Report Generated Successfully
-  `;
-
-  setReport(reportText);
-};
  const data = await response.json();
     setAiAnswer(data.answer);
  
@@ -93,6 +90,10 @@ Report Generated Successfully
     setTasks([...tasks, taskInput]);
     setTaskInput("");
   };
+  const progress =
+  totalTasks > 0
+    ? Math.round((completedTasks / totalTasks) * 100)
+    : 0;
 
   return (
     <div className="container">
@@ -218,10 +219,12 @@ Report Generated Successfully
   onChange={(e) => setTeamMembers(Number(e.target.value))}
 />
           <div className="progressBar">
-            <div className="progressFill"></div>
+           <div
+  className="progressFill"
+  style={{ width:  '${progress}%' }}
+></div>
           </div>
-
-          <p>75% Completed</p>
+<p> {progress}% Completed</p>
         </div>
 
         {/* Translator */}
