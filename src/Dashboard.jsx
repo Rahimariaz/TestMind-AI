@@ -3,12 +3,29 @@ import axios from "axios";
 import "./Dashboard.css";
 
 function Dashboard() {
-  const [message, setMessage] = useState("Welcome to TestMind AI");
-  const generateHandover = () => {
-  alert(
-    "Current Task: Backend Development\nStatus: On Leave\nHandover Generated Successfully"
-  );
+    const generateHandover = () => {
+  const report = `
+EMPLOYEE HANDOVER REPORT
+
+Employee: ${employeeName}
+
+Current Task:
+${employeeTask}
+
+Status:
+${employeeStatus}
+
+Summary:
+${employeeName} is currently working on ${employeeTask}.
+Since the employee is ${employeeStatus},
+the remaining work should be reviewed and assigned
+to another team member until completion.
+`;
+
+  setHandover(report);
 };
+
+  const [message, setMessage] = useState("Welcome to TestMind AI");
 const generateReport = () => {
   const reportText = `
 PROJECT REPORT
@@ -30,7 +47,10 @@ Progress: ${progress}%
 
   const [aiQuestion, setAiQuestion] = useState("");
   const [aiAnswer, setAiAnswer] = useState("");
-
+const [employeeName, setEmployeeName] = useState("");
+const [employeeTask, setEmployeeTask] = useState("");
+const [employeeStatus, setEmployeeStatus] = useState("");
+const [handover, setHandover] = useState("");
   const [taskInput, setTaskInput] = useState("");
   const [teamOnline, setTeamOnline] = useState("");
 const [languages, setLanguages] = useState("");
@@ -43,42 +63,51 @@ const [report, setReport] = useState("");
     "Backend API Integration",
     "Testing",
   ]);
-  const handleTranslate = () => {
-  if (!translatorText.trim()) {
-    alert("Enter text to translate");
-    return;
-  }
-
-  if (targetLanguage === "hi") {
-    setTranslatedText("नमस्ते");
-  } else if (targetLanguage === "ta") {
-    setTranslatedText("வணக்கம்");
-  } else if (targetLanguage === "fr") {
-    setTranslatedText("Bonjour");
-  } else if (targetLanguage === "es") {
-    setTranslatedText("Hola");
-  }
-};
-const handleAI = async () => {
+    
+  const handleTranslate = async () => {
   try {
-    const response = await fetch("http://127.0.0.1:5000/ai", {
+    const response = await fetch("http://127.0.0.1:5000/translate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        question: aiQuestion,
+        text: translatorText,
+        language: targetLanguage,
       }),
-    }
-);
+    });
 
- const data = await response.json();
-    setAiAnswer(data.answer);
- 
-} catch (error) {
-    setAiAnswer("Backend not connected");
+    const data = await response.json();
+
+    setTranslatedText(data.translation);
+  } catch (error) {
+    setTranslatedText("Translation failed");
+    console.log(error);
   }
 };
+const handleAI = async () => {
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:5000/ai",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: aiQuestion,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    setAiAnswer(data.answer);
+  } catch (error) {
+    setAiAnswer("AI service unavailable");
+  }
+};
+ 
   
 
   const addTask = () => {
@@ -94,6 +123,7 @@ const handleAI = async () => {
   totalTasks > 0
     ? Math.round((completedTasks / totalTasks) * 100)
     : 0;
+     
 
   return (
     <div className="container">
@@ -263,31 +293,30 @@ const handleAI = async () => {
         </div>
 
         {/* AI Assistant */}
-        <div className="section">
-          <h2>🤖 AI Assistant</h2>
+       <div className="section">
+  <h2>🤖 AI Assistant</h2>
 
-          <input
-            type="text"
-            placeholder="Ask AI..."
-            value={aiQuestion}
-            onChange={(e) =>
-              setAiQuestion(e.target.value)
-            }
-          />
+  <input
+    type="text"
+    placeholder="Ask AI..."
+    value={aiQuestion}
+    onChange={(e) => setAiQuestion(e.target.value)}
+  />
 
-          <button
-            className="actionBtn"
-            onClick={handleAI}
-          >
-            Ask AI
-          </button>
+  <button
+    className="actionBtn"
+    onClick={handleAI}
+  >
+    Ask AI
+  </button>
 
-          {aiAnswer && (
-            <div className="outputBox">
-              {aiAnswer}
-            </div>
-          )}
-        </div>
+  {aiAnswer && (
+    <div className="outputBox">
+      {aiAnswer}
+    </div>
+  )}
+
+</div>
 
         {/* Task Manager */}
         <div className="section">
@@ -318,16 +347,35 @@ const handleAI = async () => {
         {/* Shadow Employee */}
         <div className="section">
           <h2>👨‍💻 AI Shadow Employee</h2>
+            <input
+  placeholder="Employee Name"
+  value={employeeName}
+  onChange={(e) => setEmployeeName(e.target.value)}
+/>
 
-          <p>Current Task: Backend Development</p>
-          <p>Status: On Leave</p>
+<input
+  placeholder="Current Task"
+  value={employeeTask}
+  onChange={(e) => setEmployeeTask(e.target.value)}
+/>
+
+<input
+  placeholder="Status"
+  value={employeeStatus}
+  onChange={(e) => setEmployeeStatus(e.target.value)}
+/>
 <button
   className="actionBtn"
-  onClick={() => alert("Handover Generated Successfully")}
+  onClick={generateHandover}
 >
   Generate Handover
 </button>
-          
+      {handover && (
+  <div className="outputBox">
+    <pre>{handover}</pre>
+  </div>
+)}
+            
         </div>
 
         {/* Reports */}
